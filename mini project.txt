@@ -1,0 +1,139 @@
+import java.util.Scanner;
+
+public class ConnectFour {
+
+    static final int ROWS = 6;
+    static final int COLS = 7;
+    static char[][] board = new char[ROWS][COLS];
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        boolean playAgain = true;
+
+        while (playAgain) {
+
+            initializeBoard();
+
+            char currentPlayer = 'X';
+            boolean gameOver = false;
+
+            while (!gameOver) {
+
+                displayBoard();
+
+                int column;
+
+                while (true) {
+                    System.out.print("Player " + currentPlayer + ", choose column (1-7): ");
+
+                    if (!sc.hasNextInt()) {
+                        System.out.println("Invalid input! Enter a number.");
+                        sc.next();
+                        continue;
+                    }
+
+                    column = sc.nextInt() - 1;
+
+                    if (column < 0 || column >= COLS) {
+                        System.out.println("Column must be between 1 and 7.");
+                    } else if (board[0][column] != '.') {
+                        System.out.println("That column is full.");
+                    } else {
+                        break;
+                    }
+                }
+
+                int row = dropPiece(column, currentPlayer);
+
+                if (checkWinner(row, column, currentPlayer)) {
+                    displayBoard();
+                    System.out.println("Player " + currentPlayer + " wins!");
+                    gameOver = true;
+                }
+                else if (isBoardFull()) {
+                    displayBoard();
+                    System.out.println("It's a draw!");
+                    gameOver = true;
+                }
+                else {
+                    currentPlayer = (currentPlayer == 'X') ? 'O' : 'X';
+                }
+            }
+
+            System.out.print("Play again? (y/n): ");
+            char choice = sc.next().toLowerCase().charAt(0);
+            playAgain = (choice == 'y');
+        }
+
+        System.out.println("Thanks for playing!");
+        sc.close();
+    }
+
+    static void initializeBoard() {
+        for (int i = 0; i < ROWS; i++) {
+            for (int j = 0; j < COLS; j++) {
+                board[i][j] = '.';
+            }
+        }
+    }
+
+    static void displayBoard() {
+        System.out.println();
+
+        for (int i = 0; i < ROWS; i++) {
+            for (int j = 0; j < COLS; j++) {
+                System.out.print(board[i][j] + " ");
+            }
+            System.out.println();
+        }
+
+        System.out.println("1 2 3 4 5 6 7");
+        System.out.println();
+    }
+
+    static int dropPiece(int column, char player) {
+        for (int row = ROWS - 1; row >= 0; row--) {
+            if (board[row][column] == '.') {
+                board[row][column] = player;
+                return row;
+            }
+        }
+        return -1;
+    }
+
+    static boolean isBoardFull() {
+        for (int col = 0; col < COLS; col++) {
+            if (board[0][col] == '.') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static boolean checkWinner(int row, int col, char player) {
+
+        return count(row, col, 0, 1, player) + count(row, col, 0, -1, player) >= 3 ||   // Horizontal
+               count(row, col, 1, 0, player) + count(row, col, -1, 0, player) >= 3 ||   // Vertical
+               count(row, col, 1, 1, player) + count(row, col, -1, -1, player) >= 3 ||  // Diagonal \
+               count(row, col, 1, -1, player) + count(row, col, -1, 1, player) >= 3;    // Diagonal /
+    }
+
+    static int count(int row, int col, int rowDir, int colDir, char player) {
+
+        int total = 0;
+
+        row += rowDir;
+        col += colDir;
+
+        while (row >= 0 && row < ROWS &&
+               col >= 0 && col < COLS &&
+               board[row][col] == player) {
+
+            total++;
+            row += rowDir;
+            col += colDir;
+        }
+
+        return total;
+    }
+}
